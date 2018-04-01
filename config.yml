@@ -1,0 +1,38 @@
+hosts:
+  host1:
+    address: 192.168.11.2
+    port: 22
+    user: user1
+    key: keys/id_rsa_user1
+  host2:
+    address: 192.168.11.3
+    port: 22
+    user: user1
+    key: keys/id_rsa_user1
+templates:
+  docker-compose:
+    commands:
+      start:
+        command: scripts/start.sh
+      stop:
+        command: scripts/stop.sh
+      restart:
+        command: scripts/restart.sh
+      update:
+        command: scripts/update.sh  
+  myservice:
+    directory: /var/lib/${name}
+    template:
+      name: docker-compose
+services:
+  service1:
+    host: host1
+    template: 
+      name: myservice
+      vars:
+        name: service1
+  service2:
+    host: host2
+    directory: /var/lib/service2    
+    template:
+      name: docker-compose

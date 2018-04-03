@@ -49,7 +49,7 @@ func (s *ServiceConfig) substituteVariables(vars map[string]string) {
 	s.Directory = substitute(s.Directory, vars)
 	s.Host = substitute(s.Host, vars)
 	for commandName, command := range s.Commands {
-		command.Command = substitute(command.Command, vars)
+		command.Script = substitute(command.Script, vars)
 		command.Directory = substitute(command.Directory, vars)
 		command.Host = substitute(command.Host, vars)
 		s.Commands[commandName] = command
@@ -97,8 +97,8 @@ func mergeCommands(base map[string]CommandConfig, service *ServiceConfig, v map[
 func mergeCommand(base *CommandConfig, service *ServiceConfig, cmd *CommandConfig) *CommandConfig {
 	merged := *cmd
 
-	if merged.Command == "" {
-		merged.Command = base.Command
+	if merged.Script == "" {
+		merged.Script = base.Script
 	}
 	if merged.File == "" {
 		merged.File = base.File

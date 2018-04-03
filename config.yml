@@ -13,13 +13,13 @@ templates:
   docker-compose:
     commands:
       start:
-        command: scripts/start.sh
+        file: scripts/start.sh
       stop:
-        command: scripts/stop.sh
+        file: scripts/stop.sh
       restart:
-        command: scripts/restart.sh
+        file: scripts/restart.sh
       update:
-        command: scripts/update.sh  
+        file: scripts/update.sh  
   myservice:
     directory: /var/lib/${name}
     template:

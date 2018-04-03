@@ -16,10 +16,11 @@ type (
 		Services  map[string]ServiceConfig `yaml:"services"`
 	}
 	HostConfig struct {
-		Address string `yaml:"address"`
-		Port    int    `yaml:"port"`
-		User    string `yaml:"user"`
-		Key     string `yaml:"key"`
+		Address  string `yaml:"address"`
+		Port     int    `yaml:"port"`
+		User     string `yaml:"user"`
+		Key      string `yaml:"key"`
+		Password string `yaml:"password"`
 	}
 	TemplateRefConfig struct {
 		Name string            `yaml:"name"`
@@ -27,7 +28,7 @@ type (
 	}
 	CommandConfig struct {
 		Name        string `yaml:"name"`
-		Command     string `yaml:"command,omitempty"`
+		Script      string `yaml:"script,omitempty"`
 		File        string `yaml:"file,omitempty"`
 		Host        string `yaml:"host"`
 		Directory   string `yaml:"directory"`
@@ -98,10 +99,10 @@ func (c *Config) verify() error {
 			if !exist {
 				return fmt.Errorf("host doesn't exist. (service=%s, command=%s, host=%s)", service.Name, command.Name, command.Host)
 			}
-			if command.Command == "" && command.File == "" {
+			if command.Script == "" && command.File == "" {
 				return fmt.Errorf("Specify either 'command' or 'file'. (service=%s, command=%s, host=%s)", service.Name, command.Name, command.Host)
 			}
-			if command.Command != "" && command.File != "" {
+			if command.Script != "" && command.File != "" {
 				return fmt.Errorf("Can not specify both 'command' and 'file'. (service=%s, command=%s, host=%s)", service.Name, command.Name, command.Host)
 			}
 		}

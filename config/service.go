@@ -112,5 +112,10 @@ func mergeCommand(base *CommandConfig, service *ServiceConfig, cmd *CommandConfi
 	if merged.Description == "" {
 		merged.Description = base.Description
 	}
+	for k, v := range base.Environment {
+		if _, exists := merged.Environment[k]; !exists {
+			merged.Environment[k] = v
+		}
+	}
 	return &merged
 }

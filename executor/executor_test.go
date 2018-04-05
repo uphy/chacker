@@ -8,7 +8,7 @@ import (
 
 func TestExecutorRun(t *testing.T) {
 	e := New()
-	if _, err := e.Execute(&config.HostConfig{
+	if r, err := e.Execute(&config.HostConfig{
 		Address:  "192.168.100.138",
 		Port:     22,
 		User:     "ishikura",
@@ -16,9 +16,17 @@ func TestExecutorRun(t *testing.T) {
 	}, &config.CommandConfig{
 		Script: `#!/bin/bash
 ls -al /tmp
+env
 `,
+		Environment: map[string]string{
+			"foo": "1",
+			"bar": "aaa",
+		},
 	}, []string{}); err != nil {
 		t.Fatal(err)
+	} else {
+		if r == nil {
+			t.Fatal("result == nil")
+		}
 	}
-	t.Error()
 }

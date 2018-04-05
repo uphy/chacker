@@ -24,6 +24,8 @@ templates:
     commands:
       start:
         file: scripts/start.sh
+        environment:
+          foo: 1
       stop:
         file: scripts/stop.sh
       restart:
@@ -34,6 +36,11 @@ templates:
     directory: /var/lib/${name}
     template:
       name: docker-compose
+    commands:
+      start:
+        environment:
+          foo: 2
+          bar: aa
 services:
   service1:
     host: host1
@@ -66,10 +73,10 @@ services:
 	if !ok {
 		t.Error("command config not resolved")
 	}
-	if cmd.Command == "" {
+	if cmd.File == "" {
 		t.Error("command not resolved")
 	}
-	if cmd.Command != "scripts/start.sh" {
+	if cmd.File != "scripts/start.sh" {
 		t.Error("template not resolved")
 	}
 }

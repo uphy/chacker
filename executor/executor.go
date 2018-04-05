@@ -62,5 +62,16 @@ func (e *Executor) Execute(host *config.HostConfig, command *config.CommandConfi
 	}
 
 	// execute the command
-	return c.Exec(tempFile)
+	cmd := tempFile
+	if len(command.Environment) > 0 {
+		envs := ""
+		for k, v := range command.Environment {
+			envs += fmt.Sprint(k, "=", v, " ")
+		}
+		cmd = envs + cmd
+	}
+	if command.Directory != "" {
+		cmd = fmt.Sprintf("cd %s; %s", command.Directory, cmd)
+	}
+	return c.Exec(cmd)
 }

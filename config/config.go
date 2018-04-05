@@ -27,12 +27,13 @@ type (
 		Vars map[string]string `yaml:"vars,omitempty"`
 	}
 	CommandConfig struct {
-		Name        string `yaml:"name"`
-		Script      string `yaml:"script,omitempty"`
-		File        string `yaml:"file,omitempty"`
-		Host        string `yaml:"host"`
-		Directory   string `yaml:"directory"`
-		Description string `yaml:"description"`
+		Name        string            `yaml:"name"`
+		Script      string            `yaml:"script,omitempty"`
+		File        string            `yaml:"file,omitempty"`
+		Host        string            `yaml:"host"`
+		Directory   string            `yaml:"directory"`
+		Description string            `yaml:"description"`
+		Environment map[string]string `yaml:"environment"`
 	}
 )
 
@@ -64,6 +65,13 @@ func LoadConfig(reader io.Reader) (*Config, error) {
 	var c Config
 	if err := yaml.Unmarshal(data, &c); err != nil {
 		return nil, fmt.Errorf("failed to parse config file: %v", err)
+	}
+	// set default values
+	for name, host := range c.Hosts {
+		if host.Port <= 0 {
+			host.Port = 22
+		}
+		c.Hosts[name] = host
 	}
 	// resolve template of template
 	for name, template := range c.Templates {

@@ -16,11 +16,12 @@ type (
 		Services  map[string]ServiceConfig `yaml:"services"`
 	}
 	HostConfig struct {
-		Address  string `yaml:"address"`
-		Port     int    `yaml:"port"`
-		User     string `yaml:"user"`
-		Key      string `yaml:"key"`
-		Password string `yaml:"password"`
+		Address    string `yaml:"address"`
+		Port       int    `yaml:"port"`
+		User       string `yaml:"user"`
+		Key        string `yaml:"key"`
+		Password   string `yaml:"password"`
+		PassPhrase string `yaml:"passphrase"`
 	}
 	TemplateRefConfig struct {
 		Name string            `yaml:"name"`

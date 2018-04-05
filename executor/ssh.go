@@ -19,7 +19,7 @@ type SSHClient struct {
 func NewSSHClientFromHostConfig(host *config.HostConfig) (*SSHClient, error) {
 	dest := fmt.Sprint(host.Address, ":", host.Port)
 	if host.Key != "" {
-		return NewSSHClientFromPrivateKey(dest, host.User, host.Key)
+		return NewSSHClientFromPrivateKey(dest, host.User, host.Key, []byte(host.PassPhrase))
 	} else {
 		return NewSSHClientFromPassword(dest, host.User, host.Password)
 	}
@@ -40,14 +40,19 @@ func NewSSHClientFromPassword(dest string, user string, password string) (*SSHCl
 	return &SSHClient{client}, nil
 }
 
-func NewSSHClientFromPrivateKey(dest string, user string, privateKey string) (*SSHClient, error) {
+func NewSSHClientFromPrivateKey(dest string, user string, privateKey string, passphrase []byte) (*SSHClient, error) {
 	buf, err := ioutil.ReadFile(privateKey)
 	if err != nil {
 		panic(err)
 	}
-	key, err := ssh.ParsePrivateKey(buf)
+	var key ssh.Signer
+	if passphrase == nil || len(passphrase) == 0 {
+		key, err = ssh.ParsePrivateKey(buf)
+	} else {
+		key, err = ssh.ParsePrivateKeyWithPassphrase(buf, passphrase)
+	}
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	config := &ssh.ClientConfig{
 		User: user,

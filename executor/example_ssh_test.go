@@ -10,7 +10,7 @@ import (
 const Password = "ishikura"
 
 func ExampleSSH_Pubkey() {
-	client, err := executor.NewSSHClientFromPrivateKey("192.168.100.138:22", "ishikura", "./id_rsa")
+	client, err := executor.NewSSHClientFromPrivateKey("192.168.100.138:22", "ishikura", "./id_rsa", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -18,7 +18,7 @@ func ExampleSSH_Pubkey() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(user)
+	fmt.Println(user.StdOut)
 	// Output:
 	// ishikura
 }
@@ -32,7 +32,7 @@ func ExampleSSH() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(user)
+	fmt.Println(user.StdOut)
 	// Output:
 	// ishikura
 }

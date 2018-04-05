@@ -9,6 +9,7 @@ hosts:
     port: 22
     user: user1
     key: keys/id_rsa_user1
+    passphrase: user1
 templates:
   docker-compose:
     commands:

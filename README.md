@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/uphy/chacker.svg?branch=master)](https://travis-ci.org/uphy/chacker)
+
 # Chacker
 
 Remote service controller especially for ChatOps.

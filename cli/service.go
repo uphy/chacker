@@ -99,7 +99,7 @@ func (c *CLI) executeCommand(serviceName string, commandName string, args []stri
 		return result.NewError(fmt.Errorf("failed to execute command: %v", err))
 	}
 	body := result.NewCommandResultBody()
-	body.ExitCode = commandResult.ExitCode
+	body.ExitStatus = commandResult.ExitStatus
 	body.StdOut = commandResult.StdOut
 	body.StdErr = commandResult.StdErr
 	return result.New(body)

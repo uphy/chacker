@@ -7,9 +7,9 @@ import (
 
 type (
 	CommandResultBody struct {
-		ExitCode int    `json:"exitCode"`
-		StdOut   string `json:"stdout,omitempty"`
-		StdErr   string `json:"stderr,omitempty"`
+		ExitStatus int    `json:"status"`
+		StdOut     string `json:"stdout,omitempty"`
+		StdErr     string `json:"stderr,omitempty"`
 	}
 )
 
@@ -22,7 +22,7 @@ func (c *CommandResultBody) JSON() interface{} {
 }
 
 func (c *CommandResultBody) Pretty(writer io.Writer) error {
-	if c.ExitCode == 0 {
+	if c.ExitStatus == 0 {
 		if c.StdOut != "" {
 			fmt.Fprintln(writer, c.StdOut)
 		}
@@ -30,7 +30,7 @@ func (c *CommandResultBody) Pretty(writer io.Writer) error {
 			fmt.Fprintln(writer, c.StdErr)
 		}
 	} else {
-		_, err := fmt.Fprintf(writer, "Failed to execute command.  (exitCode=%d, stdout=%s, stderr=%s)\n", c.ExitCode, c.StdOut, c.StdErr)
+		_, err := fmt.Fprintf(writer, "Failed to execute command.  (exitCode=%d, stdout=%s, stderr=%s)\n", c.ExitStatus, c.StdOut, c.StdErr)
 		return err
 	}
 	return nil

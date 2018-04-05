@@ -70,6 +70,13 @@ func (e *Executor) Execute(host *config.HostConfig, command *config.CommandConfi
 		}
 		cmd = envs + cmd
 	}
+	if len(args) > 0 {
+		s := ""
+		for _, arg := range args {
+			s += fmt.Sprintf(` "%s"`, arg)
+		}
+		cmd = cmd + s
+	}
 	if command.Directory != "" {
 		cmd = fmt.Sprintf("cd %s; %s", command.Directory, cmd)
 	}

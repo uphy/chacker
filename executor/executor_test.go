@@ -22,7 +22,7 @@ env
 			"foo": "1",
 			"bar": "aaa",
 		},
-	}, []string{}); err != nil {
+	}, []string{"arg1", "arg2"}); err != nil {
 		t.Fatal(err)
 	} else {
 		if r == nil {

@@ -20,9 +20,8 @@ func NewSSHClientFromHostConfig(host *config.HostConfig) (*SSHClient, error) {
 	dest := fmt.Sprint(host.Address, ":", host.Port)
 	if host.Key != "" {
 		return NewSSHClientFromPrivateKey(dest, host.User, host.Key, []byte(host.PassPhrase))
-	} else {
-		return NewSSHClientFromPassword(dest, host.User, host.Password)
 	}
+	return NewSSHClientFromPassword(dest, host.User, host.Password)
 }
 
 func NewSSHClientFromPassword(dest string, user string, password string) (*SSHClient, error) {
@@ -43,7 +42,7 @@ func NewSSHClientFromPassword(dest string, user string, password string) (*SSHCl
 func NewSSHClientFromPrivateKey(dest string, user string, privateKey string, passphrase []byte) (*SSHClient, error) {
 	buf, err := ioutil.ReadFile(privateKey)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	var key ssh.Signer
 	if passphrase == nil || len(passphrase) == 0 {
@@ -87,8 +86,8 @@ func (s *SSHClient) Copy(src, dest string, permission string) error {
 	}
 	defer session.Close()
 	errCh := make(chan error, 1)
-	defer close(errCh)
 	go func() {
+		defer close(errCh)
 		w, err := session.StdinPipe()
 		if err != nil {
 			errCh <- fmt.Errorf("failed to pipe stdin: %v", err)
@@ -107,7 +106,7 @@ func (s *SSHClient) Copy(src, dest string, permission string) error {
 			session.Close()
 			return
 		}
-		if _, err := io.Copy(w, f); err != nil {
+		if _, err := io.Copy(w, f); err != nil && err != io.EOF {
 			errCh <- fmt.Errorf("cannot copy src to dst: %v", err)
 			session.Close()
 			return

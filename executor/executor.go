@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/uphy/chacker/config"
@@ -49,7 +50,7 @@ func (e *Executor) Execute(host *config.HostConfig, command *config.CommandConfi
 		localFile = f.Name()
 		defer os.Remove(localFile)
 		f.Close()
-		if err := ioutil.WriteFile(localFile, []byte(command.Script), 0700); err != nil {
+		if err := ioutil.WriteFile(localFile, []byte(appendShebang(command.Script)), 0700); err != nil {
 			return nil, err
 		}
 	} else {
@@ -62,23 +63,49 @@ func (e *Executor) Execute(host *config.HostConfig, command *config.CommandConfi
 	}
 
 	// execute the command
-	cmd := tempFile
+	return c.Exec("generateCommand(command, tempFile, args)")
+}
+
+func appendShebang(script string) string {
+	if strings.HasPrefix(script, "#!") {
+		return script
+	}
+	return fmt.Sprintf("#!/bin/sh\n%s", script)
+}
+
+func generateCommand(command *config.CommandConfig, shellScriptFile string, args []string) string {
+	// command name
+	cmd := fmt.Sprintf(`"%s"`, shellScriptFile)
+
 	if len(command.Environment) > 0 {
+		// append environment variables
 		envs := ""
-		for k, v := range command.Environment {
-			envs += fmt.Sprint(k, "=", v, " ")
+		// sort
+		keys := make([]string, 0)
+		for k := range command.Environment {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		// join
+		for _, k := range keys {
+			envs += fmt.Sprintf(`%s="%s" `, k, command.Environment[k])
 		}
 		cmd = envs + cmd
 	}
+
 	if len(args) > 0 {
+		// append arguments
 		s := ""
 		for _, arg := range args {
 			s += fmt.Sprintf(` "%s"`, arg)
 		}
 		cmd = cmd + s
 	}
+
+	// change directory
 	if command.Directory != "" {
-		cmd = fmt.Sprintf("cd %s; %s", command.Directory, cmd)
+		cmd = fmt.Sprintf(`cd "%s";%s`, command.Directory, cmd)
 	}
-	return c.Exec(cmd)
+
+	return cmd
 }

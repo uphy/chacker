@@ -2,6 +2,18 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/anmitsu/go-shlex"
+  packages = ["."]
+  revision = "648efa622239a2f6ff949fed78ee37b48d499ba4"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/gliderlabs/ssh"
+  packages = ["."]
+  revision = "d6295a6cbc4b9b1a2486ff1881d97f519db189fd"
+
+[[projects]]
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
@@ -94,6 +106,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2d0568183403f74c303cecda3c62f487085ebb2b075ccbb3cb346c603763ac4e"
+  inputs-digest = "60488c8c3ec6dc1ebfb25c6a97ebf02663418197cdd4985358850b79ddcc9ba2"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,6 +1,11 @@
 package executor
 
 import (
+	"archive/tar"
+	"bytes"
+	"io"
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/uphy/chacker/executor/sshtest"
@@ -52,6 +57,43 @@ func TestNewSSHClientFromPrivateKey(t *testing.T) {
 			if r.ExitStatus != 0 {
 				t.Error("unexpected exit status")
 			}
+		}
+	})
+}
+
+func TestSSHClientDownload(t *testing.T) {
+	buf := new(bytes.Buffer)
+	tw := tar.NewWriter(buf)
+	tw.WriteHeader(&tar.Header{
+		Name: "log.txt",
+		Size: 5,
+	})
+	io.WriteString(tw, "hello")
+	sshtest.SSHServer(t, &sshtest.Result{
+		StdOutReader: buf,
+	}, func() {
+		client, err := NewSSHClientFromPassword(sshtest.Address, "user1", "user1")
+		if err != nil {
+			t.Fatal(err)
+		}
+		dir, err := ioutil.TempDir("", "chackertest")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.RemoveAll(dir)
+		if err := client.Download("/tmp/hello.txt", dir); err != nil {
+			t.Error(err)
+		}
+		files, err := ioutil.ReadDir(dir)
+		if err != nil {
+			t.Error(err)
+		}
+		if len(files) != 1 {
+			t.Error("expected single file.")
+		}
+		file := files[0]
+		if file.Name() != "log.txt" {
+			t.Error("invalid name")
 		}
 	})
 }

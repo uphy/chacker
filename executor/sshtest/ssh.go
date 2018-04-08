@@ -16,10 +16,24 @@ const (
 )
 
 type Result struct {
-	StdOut      string
-	StdErr      string
-	ExitStatus  int
-	AuthFailure bool
+	StdOut       string
+	StdOutReader io.Reader
+	StdErr       string
+	StdErrReader io.Reader
+	ExitStatus   int
+	AuthFailure  bool
+}
+
+func write(w io.Writer, r io.Reader, s string) error {
+	if r != nil {
+		if _, err := io.Copy(w, r); err != nil {
+			return err
+		}
+	}
+	if _, err := io.WriteString(w, s); err != nil {
+		return err
+	}
+	return nil
 }
 
 func SSHServer(t *testing.T, expected *Result, f func()) {
@@ -28,9 +42,8 @@ func SSHServer(t *testing.T, expected *Result, f func()) {
 	}
 	srv.Handler = func(s ssh.Session) {
 		if expected != nil {
-			io.WriteString(s, expected.StdOut)
-			io.WriteString(s.Stderr(), expected.StdErr)
-			s.Exit(expected.ExitStatus)
+			write(s, expected.StdOutReader, expected.StdOut)
+			write(s, expected.StdErrReader, expected.StdErr)
 		} else {
 			s.Exit(0)
 		}

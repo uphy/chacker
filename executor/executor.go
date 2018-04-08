@@ -58,7 +58,7 @@ func (e *Executor) Execute(host *config.HostConfig, command *config.CommandConfi
 	}
 
 	// send command file
-	if err := c.Copy(localFile, tempFile, "0755"); err != nil {
+	if err := c.Upload(localFile, tempFile, "0755"); err != nil {
 		return nil, err
 	}
 

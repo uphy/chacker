@@ -26,16 +26,17 @@ hosts:
     port: 22
     user: user1
     key: keys/id_rsa_user1
+    passphrase: pass
 services:
   apache:
     host: host1
     commands:
       start:
-        command: apachectl start
+        script: apachectl start
       stop:
-        command: apachectl graceful-stop
+        script: apachectl graceful-stop
       say:
-        command: echo $1
+        script: echo $1
 ```
 
 Print the service list.
@@ -85,7 +86,7 @@ You can execute chacker command via HTTP.
 
 ```bash
 $ curl -XPOST localhost:8080/run -F "command=service apache start"
-{"body":{"exitCode":0,"stdout":""},"message":""}
+{"body":{"status":0,"stdout":""},"message":""}
 ```
 
 Same as above example, you can send HTTP request from Hubot.

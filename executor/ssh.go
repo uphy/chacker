@@ -1,12 +1,14 @@
 package executor
 
 import (
+	"archive/tar"
 	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/uphy/chacker/config"
 	"golang.org/x/crypto/ssh"
@@ -67,11 +69,64 @@ func NewSSHClientFromPrivateKey(dest string, user string, privateKey string, pas
 	return &SSHClient{client}, nil
 }
 
-// Copy copies local file to remote.
+func (s *SSHClient) Download(src, dest string) error {
+	session, err := s.client.NewSession()
+	if err != nil {
+		return fmt.Errorf("failed to create session: %v", err)
+	}
+	defer session.Close()
+	in, err := session.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	result := make(chan error)
+	go func() {
+		err := extractTar(in, dest)
+		result <- err
+	}()
+	err = session.Run(fmt.Sprintf(`tar cf - "%s"`, src))
+	tarErr := <-result
+	if err != nil {
+		return err
+	}
+	return tarErr
+}
+
+func extractTar(reader io.Reader, dest string) error {
+	tr := tar.NewReader(reader)
+	for {
+		h, err := tr.Next()
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+			return err
+		}
+
+		outfile := filepath.Join(dest, h.Name)
+		outdir, _ := filepath.Split(outfile)
+		if outdir != "" {
+			if err := os.MkdirAll(outdir, 0700); err != nil {
+				return err
+			}
+		}
+		w, err := os.Create(outfile)
+		if err != nil {
+			return err
+		}
+		if _, err := io.Copy(w, tr); err != nil {
+			w.Close()
+			return err
+		}
+		w.Close()
+	}
+}
+
+// Upload uploads local file to remote.
 // permission examples:
 // C0644: file with 0644 permission
 // D0755: directory with 0755 permission
-func (s *SSHClient) Copy(src, dest string, permission string) error {
+func (s *SSHClient) Upload(src, dest string, permission string) error {
 	info, err := os.Stat(src)
 	if os.IsNotExist(err) {
 		return fmt.Errorf("file not exist: %v", src)

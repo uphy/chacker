@@ -84,7 +84,7 @@ func (s *SSHClient) Download(src, dest string) error {
 		err := extractTar(in, dest)
 		result <- err
 	}()
-	err = session.Run(fmt.Sprintf(`tar cf - "%s"`, src))
+	err = session.Run(fmt.Sprintf(`cd "%s";tar cf - .`, src))
 	tarErr := <-result
 	if err != nil {
 		return err
@@ -104,10 +104,17 @@ func extractTar(reader io.Reader, dest string) error {
 		}
 
 		outfile := filepath.Join(dest, h.Name)
+		if h.FileInfo().IsDir() {
+			os.MkdirAll(outfile, 0700)
+			continue
+		}
+
 		outdir, _ := filepath.Split(outfile)
 		if outdir != "" {
-			if err := os.MkdirAll(outdir, 0700); err != nil {
-				return err
+			if _, err := os.Stat(outdir); os.IsNotExist(err) {
+				if err := os.MkdirAll(outdir, 0700); err != nil {
+					return err
+				}
 			}
 		}
 		w, err := os.Create(outfile)
